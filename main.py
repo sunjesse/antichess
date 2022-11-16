@@ -14,7 +14,7 @@ def is_valid_move(board, move):
 		print("Invalid move! Try again.")
 		return False
 
-	# check if we can capture a piece. If there exists such a move,
+	# check if current player can capture a piece. If there exists such a move,
 	# the player must play a capture move.
 	capture_moves = list(filter(lambda mv : board.is_capture(mv), board.legal_moves))
 	if len(capture_moves) > 0 and move not in capture_moves:

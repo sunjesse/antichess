@@ -1,11 +1,12 @@
 import chess
 import argparse
 import utils
-from evaluate import eval
+from evaluate import eval, branch
 
 def parse_args():
 	parser = argparse.ArgumentParser()
 	parser.add_argument('--bf', action='store_true', help="Assign bot to player 1.")
+	parser.add_argument('--bvb', action='store_true', help="Bot vs bot.")
 	return parser.parse_args()
 	
 
@@ -16,9 +17,9 @@ def is_valid_move(board, move):
 
 	# check if current player can capture a piece. If there exists such a move,
 	# the player must play a capture move.
-	capture_moves = list(filter(lambda mv : board.is_capture(mv), board.legal_moves))
+	capture_moves = utils.get_capture_moves(board)
 	if len(capture_moves) > 0 and move not in capture_moves:
-		print(f"Invalid mode.\nPlace a capture move from {[x.uci() for x in capture_moves]}")
+		print(f"Invalid mode. Place a capture move from {[x.uci() for x in capture_moves]}")
 		return False
 				
 	return True	
@@ -34,19 +35,33 @@ def play(args):
 	board = chess.Board()
 	print(board)
 	while not is_game_over(board, n):
-		if n % 2 == 0:  # player 1 turn
-			_move = eval(board, n) if args.bf else utils.get_input(n)
-		else: # player 2 turn
-			_move = utils.get_input(n) if args.bf else eval(board, n) 
-				
+		if args.bvb: # play bot vs bot
+			_move = eval(board, n, branch)
+		else:
+			if n % 2 == 0:  # player 1 turn
+				_move = eval(board) if args.bf else utils.get_input(n)
+			else: # player 2 turn
+				_move = utils.get_input(n) if args.bf else eval(board) 
+
 		try:
+			is_bot_turn = ((n % 2 == 0) and args.bf) or ((n%2 == 1) and not args.bf) 
 			move = chess.Move.from_uci(_move)
-			if is_valid_move(board, move): 
+			# do not need to check if bot move is valid
+			# as it chooses from a valid move.
+			if is_bot_turn:
 				board.push(move)
 				n += 1
 				print(board)
+
+			elif is_valid_move(board, move): 
+				board.push(move)
+				n += 1
+				print(board)
+
 		except:
 			print("Invalid input. Input standard algebraic notation move.")
+
+	print(f"\nPlayer {(n+1) % 2 + 1} won!")
 
 if __name__ == '__main__':
 	args = parse_args()

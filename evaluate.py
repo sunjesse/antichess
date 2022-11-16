@@ -48,12 +48,13 @@ def branch(board, layers=3, myturn=True):
 			vals[mv.uci()] = value(board, mv)
 		else:
 			_board = chess.Board(board.fen()) # deep copy of board
+			v = value(_board, mv)
 			_board.push(mv)
 			if utils.is_game_over(_board):
 				vals[mv.uci()] = 10
 			else:
-				vals[mv.uci()] = branch(_board, layers-1, not myturn)[1]
-	
+				vals[mv.uci()] = branch(_board, layers-1, not myturn)[1] + v # should we add reward for mv?
+
 	arg = max(vals, key=vals.get) if myturn else min(vals, key=vals.get)
 	v = vals[arg]
 	return arg, v 

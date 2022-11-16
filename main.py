@@ -1,7 +1,7 @@
 import chess
 import argparse
 import utils
-from evaluate import eval, branch
+from evaluate import eval, branch, randomized
 
 def parse_args():
 	parser = argparse.ArgumentParser()
@@ -11,6 +11,12 @@ def parse_args():
 	
 
 def is_valid_move(board, move):
+	"""
+	Check if "move" (chess.Move object) is valid anti-chess move.
+	That is, first check if it is legal according to chess moves,
+	then it must obey the anti-chess rule where it must be a
+	capture move if a capture move is available.
+	"""
 	if not board.is_legal(move):
 		print("Invalid move! Try again.")
 		return False
@@ -24,19 +30,16 @@ def is_valid_move(board, move):
 				
 	return True	
 	
-def is_game_over(board, n):
-	end = board.is_checkmate() or board.is_stalemate() or board.is_repetition() 	
-	if n >= 50:
-		end = end or board.is_fifty_moves()
-	return end
-
 def play(args):
 	n = 0
 	board = chess.Board()
 	print(board)
-	while not is_game_over(board, n):
+	while not utils.is_game_over(board):
 		if args.bvb: # play bot vs bot
-			_move = eval(board, n, branch)
+			if n % 2 == 0:  # player 1 is branch
+				_move = eval(board, n, branch)
+			else: # player 2 is randomized
+				_move = eval(board, n, randomized)
 		else:
 			if n % 2 == 0:  # player 1 turn
 				_move = eval(board) if args.bf else utils.get_input(n)
@@ -60,8 +63,9 @@ def play(args):
 
 		except:
 			print("Invalid input. Input standard algebraic notation move.")
-
-	print(f"\nPlayer {(n+1) % 2 + 1} won!")
+	
+	# TODO: figure out who wins + checkmate rules lol
+	print(f"\nPlayer {n % 2 + 1} won!")
 
 if __name__ == '__main__':
 	args = parse_args()

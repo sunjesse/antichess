@@ -50,8 +50,10 @@ def branch(board, layers=3, myturn=True):
 			_board = chess.Board(board.fen()) # deep copy of board
 			v = value(_board, mv)
 			_board.push(mv)
-			if utils.is_game_over(_board):
-				vals[mv.uci()] = 10
+			if _board.is_checkmate():
+				vals[mv.uci()] = 100 # assign checkmate arbitrary high value
+			elif _board.is_stalemate():
+				vals[mv.uci()] = -100 # assign stalemate low value since we stalemate other player wins
 			else:
 				vals[mv.uci()] = branch(_board, layers-1, not myturn)[1] + v # should we add reward for mv?
 

@@ -1,8 +1,12 @@
+import time
 import chess
 import argparse
 import utils
 from chessboard import display
-from evaluate import eval, branch, randomized, sumbased
+from evaluate import eval, branch, randomized
+from holistic import holistic
+from holistic_random import holistic_random
+
 
 def parse_args():
 	parser = argparse.ArgumentParser()
@@ -29,7 +33,7 @@ def is_valid_move(board, move):
 		print(f"Invalid mode. Place a capture move from {[x.uci() for x in capture_moves]}")
 		return False
 				
-	return True	
+	return True
 	
 def play(args):
 	n = 0
@@ -38,9 +42,9 @@ def play(args):
 	while not board.is_game_over():
 		if args.bvb: # play bot vs bot
 			if n % 2 == 0:  # player 1 is branch
-				_move = eval(board, n, sumbased)
+				_move = eval(board, n, holistic_random)
 			else: # player 2 is randomized
-				_move = eval(board, n, sumbased)
+				_move = eval(board, n, holistic_random)
 		else:
 			if n % 2 == 0:  # player 1 turn
 				_move = eval(board) if args.bf else utils.get_input(n)
@@ -62,7 +66,7 @@ def play(args):
 				n += 1
 				display.update(board.fen(), display_board)
 
-		except:
+		except Exception as e:
 			print("Invalid input. Input standard algebraic notation move.")
 	
 	# TODO: figure out who wins + checkmate rules lol

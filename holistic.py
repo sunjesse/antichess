@@ -142,8 +142,6 @@ def recurse_max(board, layers, alpha=-inf, beta=inf, transpositions=dict()):
 				transpositions[board.fen()] = val
 
 		# Update the local maximum and store the best move as needed
-		print("LOCAL MAX", local_max)
-		print("VAL", val)
 		if val > local_max:
 			local_max = val
 			best_move = move.uci()
@@ -174,12 +172,12 @@ def recurse_min(board, layers, alpha=-100, beta=100, transpositions=dict()):
 		# Check termination conditions
 		outcome = _board.outcome()
 		if outcome:
-			if outcome.winner == None: # No winner, so it's a stalemate
+			if outcome.winner == None:	# No winner, so it's a stalemate
 				val = 0
-			elif outcome.winner: 			 # White wins, so we return high positive value
+			elif outcome.winner:				# White wins, so we return high positive value
 				val = inf
 			else:
-				val = -inf		 					 # Black wins, so we return high negative value
+				val = -inf								# Black wins, so we return high negative value
 		else:
 			# Evaluate maximum value for the move to get next player's move
 			# Either choose the cached value or calculate it

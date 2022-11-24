@@ -143,8 +143,6 @@ def recurse_max(board, layers, alpha=-inf, beta=inf, transpositions=dict()):
 				transpositions[board.fen()] = val
 
 		# Update the local maximum and store the best move as needed
-		print("LOCAL MAX", local_max)
-		print("VAL", val)
 		if val == local_max:
 			chosen_move = random.choice([(best_move, local_max), (move, val)])
 			best_move = chosen_move[0]

@@ -1,7 +1,12 @@
+import time
 import chess
 import argparse
 import utils
+from chessboard import display
 from evaluate import eval, branch, randomized
+from holistic import holistic
+from holistic_random import holistic_random
+
 
 def parse_args():
 	parser = argparse.ArgumentParser()
@@ -28,23 +33,23 @@ def is_valid_move(board, move):
 		print(f"Invalid mode. Place a capture move from {[x.uci() for x in capture_moves]}")
 		return False
 				
-	return True	
+	return True
 	
 def play(args):
 	n = 0
 	board = chess.Board()
-	print(board)
-	while not utils.is_game_over(board):
+	display_board = display.start(board.fen())
+	while not board.is_game_over():
 		if args.bvb: # play bot vs bot
 			if n % 2 == 0:  # player 1 is branch
-				_move = eval(board, n, branch)
+				_move = eval(board, n, holistic_random)
 			else: # player 2 is randomized
-				_move = eval(board, n, randomized)
+				_move = eval(board, n, holistic_random)
 		else:
 			if n % 2 == 0:  # player 1 turn
 				_move = eval(board) if args.bf else utils.get_input(n)
 			else: # player 2 turn
-				_move = utils.get_input(n) if args.bf else eval(board) 
+				_move = utils.get_input(n) if args.bf else eval(board)
 
 		try:
 			is_bot_turn = ((n % 2 == 0) and args.bf) or ((n%2 == 1) and not args.bf) 
@@ -54,18 +59,21 @@ def play(args):
 			if is_bot_turn:
 				board.push(move)
 				n += 1
-				print(board)
+				display.update(board.fen(), display_board)
 
 			elif is_valid_move(board, move): 
 				board.push(move)
 				n += 1
-				print(board)
+				display.update(board.fen(), display_board)
 
-		except:
+		except Exception as e:
 			print("Invalid input. Input standard algebraic notation move.")
 	
 	# TODO: figure out who wins + checkmate rules lol
-	print(f"\nPlayer {n % 2 + 1} won!")
+	print(board.outcome());
+	display.terminate()
+	# print(f"\nPlayer {n % 2 + 1} won!")
+
 
 if __name__ == '__main__':
 	args = parse_args()

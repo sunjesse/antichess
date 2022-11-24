@@ -1,14 +1,24 @@
 import chess
 import utils
 import random
+from math import inf
+
+PAWN = 1
+KNIGHT = 2
+BISHOP = 3
+ROOK = 4
+QUEEN = 5
+KING = 6
+WHITE = True
+BLACK = False
 
 reward = {
-	1: 1, # pawn 1
-	2: 2, # knight 2
-	4: 3, # rook 4
-	3: 4, # bishop 3
-	5: 5, # queen 5
-	6: 6, # king 6
+	PAWN: 1, # pawn 1
+	KNIGHT: 3, # knight 3
+	BISHOP: 3, # bishop 3
+	ROOK: 5, # rook 5
+	QUEEN: 9, # queen 9
+	KING: 10, # king 10
 	0: 0 # no piece
 }
 
@@ -88,6 +98,6 @@ def eval(board, n, eval_func):
 	Returns:
 		A valid move in uci string format.
 	"""
-	move, val = eval_func(board, 3, True)
+	move, val = eval_func(board)
 	print(f"Bot {n%2 + 1} is moving {move} with payoff {val}...")
 	return move

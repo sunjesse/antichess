@@ -38,7 +38,7 @@ def value(board, move):
 			piece = board.piece_at(move.to_square).piece_type
 	return reward[piece]
 
-def branch(board, layers=3, myturn=True):
+def branch(board, layers=4, myturn=True):
 	"""
 	Min-max strategy. (No bounding/alpha-beta pruning, so we can make more efficient)
 
@@ -61,7 +61,7 @@ def branch(board, layers=3, myturn=True):
 			v = value(_board, mv)
 			_board.push(mv)
 			if _board.is_checkmate():
-				vals[mv.uci()] = 100 # assign checkmate arbitrary high value
+				vals[mv.uci()] = 1000 # assign checkmate arbitrary high value
 			elif _board.is_stalemate():
 				vals[mv.uci()] = -100 # assign stalemate low value since we stalemate other player wins
 			else:

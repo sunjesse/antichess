@@ -3,9 +3,8 @@ import chess
 import argparse
 import utils
 from chessboard import display
-from evaluate import eval, branch, randomized
+from evaluate import WHITE, eval
 from holistic import holistic
-from holistic_random import holistic_random
 
 
 def parse_args():
@@ -42,14 +41,14 @@ def play(args):
 	while not board.is_game_over():
 		if args.bvb: # play bot vs bot
 			if n % 2 == 0:  # player 1 is branch
-				_move = eval(board, n, holistic_random)
+				_move = eval(board, n, holistic)
 			else: # player 2 is randomized
-				_move = eval(board, n, holistic_random)
+				_move = eval(board, n, holistic)
 		else:
 			if n % 2 == 0:  # player 1 turn
-				_move = eval(board) if args.bf else utils.get_input(n)
+				_move = eval(board, n, holistic) if args.bf else utils.get_input(n)
 			else: # player 2 turn
-				_move = utils.get_input(n) if args.bf else eval(board)
+				_move = utils.get_input(n) if args.bf else eval(board, n, holistic)
 
 		try:
 			is_bot_turn = ((n % 2 == 0) and args.bf) or ((n%2 == 1) and not args.bf) 
@@ -69,10 +68,14 @@ def play(args):
 		except Exception as e:
 			print("Invalid input. Input standard algebraic notation move.")
 	
-	# TODO: figure out who wins + checkmate rules lol
-	print(board.outcome());
+	outcome = board.outcome()
+	if outcome.winner == None:
+		print("Stalemate!")
+	elif outcome.winner == WHITE:
+		print(f"\nWhite wins!")
+	else:
+		print(f"\nBlack wins!")
 	display.terminate()
-	# print(f"\nPlayer {n % 2 + 1} won!")
 
 
 if __name__ == '__main__':

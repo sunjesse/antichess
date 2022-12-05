@@ -1,3 +1,4 @@
+import random
 import chess
 import utils
 from math import inf
@@ -23,12 +24,22 @@ def material_eval(board):
 	return total
 
 def eval_piece_type(board, piece_type, color):
+	"""
+	Evaluates a position based on the location of a given piece. 
+	Depending on the position of a piece, it gets a negative, positive, or zero value.
+	Input:
+		board: chess.Board object
+		piece_type: int, one of PAWN, KNIGHT, BISHOP, QUEEN
+		color: boolean, WHITE or BLACK
+	Returns:
+		Number which signifies which color has a positional advantage and by how much.
+	"""
 	pawn_eval = [
-		0,  0,  0,  0,  0,  0,  0,  0,
+		200,  200,  200,  200,  200,  200,  200,  200,
 		50,  50,  50,  50,  50,  50,  50,  50,
 		25,  25,  25,  25,  25,  25,  25,  25,
 		0,  0,  0,  0,  0,  0,  0,  0,
-		30,  0,  0,  0,  0,  0,  0,  30,
+		-30,  0,  0,  0,  0,  0,  0,  -30,
 		30,  30,  30,  0,  0,  30,  30,  30,
 		10,  10,  10,  10,  10,  10,  10,  10,
 		0,  0,  0,  0,  0,  0,  0,  0,
@@ -104,7 +115,7 @@ def piecewise_eval(board):
 				+ eval_piece_type(board, QUEEN, board.turn)
 
 def eval_board(board):
-	return material_eval(board) + 0.5 * piecewise_eval(board)
+	return material_eval(board) + 0.3 * piecewise_eval(board)
 
 
 def recurse_max(board, layers, alpha=-inf, beta=inf, transpositions=dict()):
@@ -114,6 +125,7 @@ def recurse_max(board, layers, alpha=-inf, beta=inf, transpositions=dict()):
 	# Maintain a local maximum
 	local_max = -inf
 	best_move = moves[0]
+	vals = dict()
 
 	for move in moves:
 		# Check if we reached maximum depth
@@ -135,33 +147,42 @@ def recurse_max(board, layers, alpha=-inf, beta=inf, transpositions=dict()):
 		else:
 			# Evaluate minimum value for the move to get next player's move
 			# Either choose the cached value or calculate it
-			if board.fen() in transpositions:
-				val = transpositions[board.fen()]
+			if _board.fen() in transpositions:
+				val = transpositions[_board.fen()]
 			else:
 				val = recurse_min(_board, layers - 1, alpha, beta, transpositions)[1]
-				transpositions[board.fen()] = val
+				transpositions[_board.fen()] = val
 
+		vals[move.uci()] = val
 		# Update the local maximum and store the best move as needed
 		if val > local_max:
 			local_max = val
-			best_move = move.uci()
+			best_move = move
+		elif val == local_max:
+			chosen_move = random.choice([(best_move, local_max), (move, val)])
+			best_move = chosen_move[0]
+			local_max = chosen_move[1]
 
 		if local_max >= beta:
-			return best_move, local_max
+			break
 
 		alpha = max(local_max, alpha)
 	
-	return best_move, local_max
+	if layers == 5:
+		print(vals)
+	return best_move.uci(), local_max
 
-def recurse_min(board, layers, alpha=-100, beta=100, transpositions=dict()):
+def recurse_min(board, layers, alpha=-inf, beta=inf, transpositions=dict()):
 	# Check all moves
 	moves = utils.get_all_legal_moves(board)
 
 	# Maintain a local maximum
 	local_min = inf
-	best_move = moves[0] 
+	best_move = moves[0]
+	vals = dict()
 
 	for move in moves:
+		# pdb.set_trace()
 		# Check if we reached maximum depth
 		if layers == 0:
 			return move.uci(), eval_board(board)
@@ -172,47 +193,52 @@ def recurse_min(board, layers, alpha=-100, beta=100, transpositions=dict()):
 		# Check termination conditions
 		outcome = _board.outcome()
 		if outcome:
-			if outcome.winner == None:	# No winner, so it's a stalemate
+			if outcome.winner == None: # No winner, so it's a stalemate
 				val = 0
-			elif outcome.winner:				# White wins, so we return high positive value
+			elif outcome.winner: 			 # White wins, so we return high positive value
 				val = inf
 			else:
-				val = -inf								# Black wins, so we return high negative value
+				val = -inf		 					 # Black wins, so we return high negative value
 		else:
 			# Evaluate maximum value for the move to get next player's move
 			# Either choose the cached value or calculate it
-			if board.fen() in transpositions:
-				val = transpositions[board.fen()]
+			if _board.fen() in transpositions:
+				val = transpositions[_board.fen()]
 			else:
 				val = recurse_max(_board, layers - 1, alpha, beta, transpositions)[1]
-				transpositions[board.fen()] = val
+				transpositions[_board.fen()] = val
 
+		vals[move.uci()] = val
 		# Update the local minimum and store the best move as needed
 		if val < local_min:
 			local_min = val
-			best_move = move.uci()
+			best_move = move
+		elif val == local_min:
+			chosen_move = random.choice([(best_move, local_min), (move, val)])
+			best_move = chosen_move[0]
+			local_min = chosen_move[1]
 
 		if local_min <= alpha:
-			return best_move, local_min
+			break
 
 		beta = min(local_min, beta)
-	
-	return best_move, local_min
+
+	if layers == 5:
+		print(vals)
+	return best_move.uci(), local_min
 
 
-def holistic(board, layers=30):
+def holistic(board, layers=5):
 	"""
-	Strategy that accounts for material loss and piece positioning.
+	Strategy that accounts for material difference and piece positioning.
 	Input:
 		board : chess.Board object
 		layers : layers of the tree we branch into
-		myturn : boolean that determines if the current layer is the bot's move.
-				 Use to determine whether we should min or max.
 	Returns:
-		(str, int) : Returns the optimal move along with corresponding value.
+		(str, int) : Returns the optimal move along with corresponding board eval.
 	"""
 
 	# Start with min or max depending on player
-	if board.turn:
+	if board.turn == WHITE:
 		return recurse_max(board, layers)
 	return recurse_min(board, layers)

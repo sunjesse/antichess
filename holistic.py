@@ -130,7 +130,11 @@ def recurse_max(board, layers, alpha=-inf, beta=inf, transpositions=dict()):
 	for move in moves:
 		# Check if we reached maximum depth
 		if layers == 0:
-			return move.uci(), eval_board(board)
+			val = eval_board(board)
+			if val > local_max:
+				local_max = val
+				best_move = move
+			continue
 
 		_board = board.copy() 				# Copy board so we can manipulate it
 		_board.push(move) 						# Make the move
@@ -182,10 +186,13 @@ def recurse_min(board, layers, alpha=-inf, beta=inf, transpositions=dict()):
 	vals = dict()
 
 	for move in moves:
-		# pdb.set_trace()
 		# Check if we reached maximum depth
 		if layers == 0:
-			return move.uci(), eval_board(board)
+			val = eval_board(board)
+			if val < local_min:
+				local_min = val
+				best_move = move
+			continue
 
 		_board = board.copy() 	# Copy board so we can manipulate it
 		_board.push(move) 			# Make the move

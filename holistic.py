@@ -127,6 +127,10 @@ def recurse_max(board, layers, alpha=-inf, beta=inf, transpositions=dict()):
 	best_move = moves[0]
 	vals = dict()
 
+	# Don't end on a capture move
+	if layers == 0 and utils.get_capture_moves(board) == moves:
+		layers += 1
+
 	for move in moves:
 		# Check if we reached maximum depth
 		if layers == 0:
@@ -136,18 +140,18 @@ def recurse_max(board, layers, alpha=-inf, beta=inf, transpositions=dict()):
 				best_move = move
 			continue
 
-		_board = board.copy() 				# Copy board so we can manipulate it
+		_board = board.copy()					# Copy board so we can manipulate it
 		_board.push(move) 						# Make the move
 
 		# Check termination conditions
 		outcome = _board.outcome()
 		if outcome:
-			if outcome.winner == None: # No winner, so it's a stalemate
+			if outcome.winner == None:	# No winner, so it's a stalemate
 				val = 0
-			elif outcome.winner: 			 # White wins, so we return high positive value
+			elif outcome.winner:				# White wins, so we return high positive value
 				val = inf
 			else:
-				val = -inf		 						# Black wins, so we return high negative value
+				val = -inf								# Black wins, so we return high negative value
 		else:
 			# Evaluate minimum value for the move to get next player's move
 			# Either choose the cached value or calculate it
@@ -172,8 +176,6 @@ def recurse_max(board, layers, alpha=-inf, beta=inf, transpositions=dict()):
 
 		alpha = max(local_max, alpha)
 	
-	if layers == 5:
-		print(vals)
 	return best_move.uci(), local_max
 
 def recurse_min(board, layers, alpha=-inf, beta=inf, transpositions=dict()):
@@ -184,6 +186,10 @@ def recurse_min(board, layers, alpha=-inf, beta=inf, transpositions=dict()):
 	local_min = inf
 	best_move = moves[0]
 	vals = dict()
+
+	# Don't end on a capture move
+	if layers == 0 and utils.get_capture_moves(board) == moves:
+		layers += 1
 
 	for move in moves:
 		# Check if we reached maximum depth
@@ -230,12 +236,10 @@ def recurse_min(board, layers, alpha=-inf, beta=inf, transpositions=dict()):
 
 		beta = min(local_min, beta)
 
-	if layers == 5:
-		print(vals)
 	return best_move.uci(), local_min
 
 
-def holistic(board, layers=5):
+def holistic(board, layers=3):
 	"""
 	Strategy that accounts for material difference and piece positioning.
 	Input:
@@ -247,5 +251,8 @@ def holistic(board, layers=5):
 
 	# Start with min or max depending on player
 	if board.turn == WHITE:
+		# Hardcode starting move to make it easier
+		if len(board.move_stack) == 0:
+			return 'a2a3', 0
 		return recurse_max(board, layers)
 	return recurse_min(board, layers)

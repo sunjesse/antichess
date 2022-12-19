@@ -1,4 +1,4 @@
-#Antichess submission for team `The Gym Rats` [Pranav Krishnan, Jesse Sun].
+# Antichess submission for team `The Gym Rats` [Pranav Krishnan, Jesse Sun].
 
 To build, ensure that Python 3.7 or above is installed.
 

@@ -99,5 +99,5 @@ def eval(board, n, eval_func):
 		A valid move in uci string format.
 	"""
 	move, val = eval_func(board)
-	print(f"Bot {n%2 + 1} is moving {move} with payoff {val}...")
+	print(move)
 	return move

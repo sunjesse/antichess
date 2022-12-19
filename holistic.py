@@ -144,7 +144,7 @@ def recurse_max(board, layers, alpha=-inf, beta=inf, transpositions=dict()):
 		_board.push(move) 						# Make the move
 
 		# Check termination conditions
-		outcome = _board.outcome()
+		outcome = _board.outcome(claim_draw=True)
 		if outcome:
 			if outcome.winner == None:	# No winner, so it's a stalemate
 				val = 0
@@ -204,7 +204,7 @@ def recurse_min(board, layers, alpha=-inf, beta=inf, transpositions=dict()):
 		_board.push(move) 			# Make the move
 
 		# Check termination conditions
-		outcome = _board.outcome()
+		outcome = _board.outcome(claim_draw=True)
 		if outcome:
 			if outcome.winner == None: # No winner, so it's a stalemate
 				val = 0

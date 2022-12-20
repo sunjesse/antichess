@@ -62,8 +62,6 @@ def play():
 		print(f"\nWhite wins!")
 	else:
 		print(f"\nBlack wins!")
-	display.terminate()
-
 
 if __name__ == '__main__':
 	play()

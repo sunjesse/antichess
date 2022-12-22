@@ -5,7 +5,7 @@ def get_input(n):
 	Return:
 		str : User input for move to make.
 	"""
-	return str(input(f"Move for player {n % 2 + 1}: "))
+	return str(input())
 
 def get_capture_moves(board):
 	"""

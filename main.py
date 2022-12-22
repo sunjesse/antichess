@@ -13,14 +13,14 @@ def is_valid_move(board, move):
 	capture move if a capture move is available.
 	"""
 	if not board.is_legal(move):
-		print("Invalid move! Try again.")
+		#print("Invalid move! Try again.")
 		return False
 
 	# check if current player can capture a piece. If there exists such a move,
 	# the player must play a capture move.
 	capture_moves = utils.get_capture_moves(board)
 	if len(capture_moves) > 0 and move not in capture_moves:
-		print(f"Invalid mode. Place a capture move from {[x.uci() for x in capture_moves]}")
+		#print(f"Invalid mode. Place a capture move from {[x.uci() for x in capture_moves]}")
 		return False
 				
 	return True
@@ -53,15 +53,15 @@ def play():
 				n += 1
 
 		except Exception as e:
-			print("Invalid input. Input standard algebraic notation move.")
+			continue
 	
 	outcome = board.outcome(claim_draw=True)
-	if outcome.winner == None:
-		print("Stalemate!")
-	elif outcome.winner == WHITE:
-		print(f"\nWhite wins!")
-	else:
-		print(f"\nBlack wins!")
+	#if outcome.winner == None:
+	#	print("Stalemate!")
+	#elif outcome.winner == WHITE:
+	#	print(f"\nWhite wins!")
+	#else:
+	#	print(f"\nBlack wins!")
 
 if __name__ == '__main__':
 	play()
